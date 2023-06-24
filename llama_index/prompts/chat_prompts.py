@@ -13,14 +13,15 @@ CHAT_REFINE_PROMPT_TMPL_MSGS = [
     HumanMessagePromptTemplate.from_template("{query_str}"),
     AIMessagePromptTemplate.from_template("{existing_answer}"),
     HumanMessagePromptTemplate.from_template(
-        "We have the opportunity to refine the above answer "
-        "(only if needed) with some more context below.\n"
+        "У нас есть возможность уточнить вышеуказанный ответ "
+        "(только если это необходимо) с помощью дополнительного контекста ниже.\n"
         "------------\n"
         "{context_msg}\n"
         "------------\n"
-        "Given the new context, refine the original answer to better "
-        "answer the question. "
-        "If the context isn't useful, output the original answer again.",
+        "Исходя из нового контекста, уточни исходный ответ для лучшего "
+        "ответа на вопрос. "
+        "Если контекст не является полезным, выведи исходный ответ снова."
+
     ),
 ]
 
@@ -34,17 +35,18 @@ CHAT_REFINE_TABLE_CONTEXT_TMPL_MSGS = [
     HumanMessagePromptTemplate.from_template("{query_str}"),
     AIMessagePromptTemplate.from_template("{existing_answer}"),
     HumanMessagePromptTemplate.from_template(
-        "We have provided a table schema below. "
+        "Мы предоставили схему таблицы ниже. "
         "---------------------\n"
         "{schema}\n"
         "---------------------\n"
-        "We have also provided some context information below. "
+        "Мы также предоставили некоторую контекстную информацию ниже. "
         "{context_msg}\n"
         "---------------------\n"
-        "Given the context information and the table schema, "
-        "refine the original answer to better "
-        "answer the question. "
-        "If the context isn't useful, return the original answer."
+        "Исходя из контекстной информации и схемы таблицы, "
+        "уточни исходный ответ для лучшего "
+        "ответа на вопрос. "
+        "Если контекст не является полезным, верни исходный ответ."
+
     ),
 ]
 CHAT_REFINE_TABLE_CONTEXT_PROMPT_LC = ChatPromptTemplate.from_messages(

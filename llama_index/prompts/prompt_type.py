@@ -6,66 +6,69 @@ from enum import Enum
 class PromptType(str, Enum):
     """Prompt type."""
 
-    # summarization
-    SUMMARY = "summary"
-    # tree insert node
-    TREE_INSERT = "insert"
-    # tree select query prompt
-    TREE_SELECT = "tree_select"
-    # tree select query prompt (multiple)
-    TREE_SELECT_MULTIPLE = "tree_select_multiple"
-    # question-answer
-    QUESTION_ANSWER = "text_qa"
-    # refine
-    REFINE = "refine"
-    # keyword extract
-    KEYWORD_EXTRACT = "keyword_extract"
-    # query keyword extract
-    QUERY_KEYWORD_EXTRACT = "query_keyword_extract"
+    # суммаризация
+    SUMMARY = "суммаризация"
+    # вставка узла в дерево
+    TREE_INSERT = "вставка_узла"
+    # выбор запроса из дерева
+    TREE_SELECT = "выбор_из_дерева"
+    # выбор нескольких запросов из дерева
+    TREE_SELECT_MULTIPLE = "выбор_из_дерева_несколько"
+    # вопрос-ответ
+    QUESTION_ANSWER = "вопрос_ответ"
+    # уточнение
+    REFINE = "уточнение"
+    # извлечение ключевых слов
+    KEYWORD_EXTRACT = "извлечение_ключевых_слов"
+    # извлечение ключевых слов из запроса
+    QUERY_KEYWORD_EXTRACT = "извлечение_ключевых_слов_из_запроса"
 
-    # schema extract
-    SCHEMA_EXTRACT = "schema_extract"
+    # извлечение схемы
+    SCHEMA_EXTRACT = "извлечение_схемы"
 
-    # text to sql
-    TEXT_TO_SQL = "text_to_sql"
+    # текст в SQL
+    TEXT_TO_SQL = "текст_в_SQL"
 
-    # table context
-    TABLE_CONTEXT = "table_context"
+    # контекст таблицы
+    TABLE_CONTEXT = "контекст_таблицы"
 
-    # KG extraction prompt
-    KNOWLEDGE_TRIPLET_EXTRACT = "knowledge_triplet_extract"
+    # извлечение знаний в виде троек
+    KNOWLEDGE_TRIPLET_EXTRACT = "извлечение_троек_знаний"
 
-    # Simple Input prompt
-    SIMPLE_INPUT = "simple_input"
+    # простой ввод
+    SIMPLE_INPUT = "простой_ввод"
 
-    # Pandas prompt
-    PANDAS = "pandas"
+    # Pandas
+    PANDAS = "Pandas"
 
-    # JSON path prompt
-    JSON_PATH = "json_path"
+    # JSON path
+    JSON_PATH = "JSON_path"
 
-    # Single select prompt
-    SINGLE_SELECT = "single_select"
+    # выбор одного варианта
+    SINGLE_SELECT = "одиночный_выбор"
 
-    # Multiple select prompt
-    MULTI_SELECT = "multi_select"
+    # выбор нескольких вариантов
+    MULTI_SELECT = "множественный_выбор"
 
-    VECTOR_STORE_QUERY = "vector_store_query"
+    VECTOR_STORE_QUERY = "запрос_в_векторное_хранилище"
 
-    # Sub question prompt
-    SUB_QUESTION = "sub_question"
+    # подзапрос
+    SUB_QUESTION = "подзапрос"
 
-    # SQL response synthesis prompt
-    SQL_RESPONSE_SYNTHESIS = "sql_response_synthesis"
+    # синтез SQL-ответа
+    SQL_RESPONSE_SYNTHESIS = "синтез_SQL-ответа"
 
-    # Conversation
-    CONVERSATION = "conversation"
+    # разговор
+    CONVERSATION = "разговор"
 
-    # Decompose query transform
-    DECOMPOSE = "decompose"
+    # разбиение запроса
+    DECOMPOSE = "разбиение"
 
-    # Choice select
-    CHOICE_SELECT = "choice_select"
+    # выбор варианта
+    CHOICE_SELECT = "выбор_варианта"
 
-    # custom (by default)
-    CUSTOM = "custom"
+    # пользовательский (по умолчанию)
+    CUSTOM = "пользовательский"
+
+
+
