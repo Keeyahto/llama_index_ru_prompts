@@ -5,9 +5,7 @@ from abc import abstractmethod
 from typing import Any, Callable, Dict, List, Optional, Sequence, cast
 
 from llama_index.callbacks.schema import CBEventType, EventPayload
-from llama_index.data_structs.node import Node
 from llama_index.data_structs.table import StructDatapoint
-from llama_index.indices.response import get_response_builder
 from llama_index.indices.service_context import ServiceContext
 from llama_index.langchain_helpers.sql_wrapper import SQLDatabase
 from llama_index.langchain_helpers.text_splitter import TextSplitter
@@ -27,7 +25,8 @@ from llama_index.prompts.prompts import (
     SchemaExtractPrompt,
     TableContextPrompt,
 )
-from llama_index.schema import BaseDocument
+from llama_index.response_synthesizers import get_response_synthesizer
+from llama_index.schema import BaseNode, MetadataMode
 from llama_index.utils import truncate_text
 
 logger = logging.getLogger(__name__)
@@ -76,7 +75,7 @@ class SQLDocumentContextBuilder:
 
     def build_all_context_from_documents(
         self,
-        documents_dict: Dict[str, List[BaseDocument]],
+        documents_dict: Dict[str, List[BaseNode]],
     ) -> Dict[str, str]:
         """Build context for all tables in the database."""
         context_dict = {}
@@ -88,7 +87,7 @@ class SQLDocumentContextBuilder:
 
     def build_table_context_from_documents(
         self,
-        documents: Sequence[BaseDocument],
+        documents: Sequence[BaseNode],
         table_name: str,
     ) -> str:
         """Build context from documents for a single table."""
@@ -108,17 +107,19 @@ class SQLDocumentContextBuilder:
             )
         )
         # we use the ResponseBuilder to iteratively go through all texts
-        response_builder = get_response_builder(
-            self._service_context,
-            prompt_with_schema,
-            refine_prompt_with_schema,
+        response_builder = get_response_synthesizer(
+            service_context=self._service_context,
+            text_qa_template=prompt_with_schema,
+            refine_template=refine_prompt_with_schema,
         )
         event_id = self._service_context.callback_manager.on_event_start(
             CBEventType.CHUNKING, payload={EventPayload.DOCUMENTS: documents}
         )
         text_chunks = []
         for doc in documents:
-            chunks = text_splitter.split_text(doc.get_text())
+            chunks = text_splitter.split_text(
+                doc.get_content(metadata_mode=MetadataMode.LLM)
+            )
             text_chunks.extend(chunks)
         self._service_context.callback_manager.on_event_end(
             CBEventType.CHUNKING,
@@ -190,16 +191,18 @@ class BaseStructDatapointExtractor:
     def _get_schema_text(self) -> str:
         """Get schema text for extracting relevant info from unstructured text."""
 
-    def insert_datapoint_from_nodes(self, nodes: Sequence[Node]) -> None:
+    def insert_datapoint_from_nodes(self, nodes: Sequence[BaseNode]) -> None:
         """Extract datapoint from a document and insert it."""
-        text_chunks = [node.get_text() for node in nodes]
+        text_chunks = [
+            node.get_content(metadata_mode=MetadataMode.LLM) for node in nodes
+        ]
         fields = {}
         for i, text_chunk in enumerate(text_chunks):
             fmt_text_chunk = truncate_text(text_chunk, 50)
             logger.info(f"> Adding chunk {i}: {fmt_text_chunk}")
             # if embedding specified in document, pass it to the Node
             schema_text = self._get_schema_text()
-            response_str, _ = self._llm_predictor.predict(
+            response_str = self._llm_predictor.predict(
                 self._schema_extract_prompt,
                 text=text_chunk,
                 schema=schema_text,
