@@ -1,38 +1,20 @@
-from typing import Optional
+from typing import List
 
-from llama_index.bridge.langchain import BaseChatModel, ChatMessageHistory
-
-from llama_index.chat_engine.types import ChatHistoryType
-from llama_index.indices.service_context import ServiceContext
-from llama_index.llm_predictor.base import LLMPredictor
+from llama_index.llms.base import ChatMessage, MessageRole
+from llama_index.types import TokenGen
 
 
-def to_chat_buffer(chat_history: ChatHistoryType) -> str:
-    buffer = ""
-    for human_s, ai_s in chat_history:
-        human = "Human: " + human_s
-        ai = "Assistant: " + str(ai_s)
-        buffer += "\n" + "\n".join([human, ai])
-    return buffer
+def response_gen_with_chat_history(
+    message: str, chat_history: List[ChatMessage], response_gen: TokenGen
+) -> TokenGen:
+    response_str = ""
+    for token in response_gen:
+        response_str += token
+        yield token
 
-
-def to_langchain_chat_history(
-    chat_history: Optional[ChatHistoryType] = None,
-) -> ChatMessageHistory:
-    history = ChatMessageHistory()
-    if chat_history is not None:
-        for human_message, ai_message in chat_history:
-            history.add_user_message(human_message)
-            history.add_ai_message(str(ai_message))
-    return history
-
-
-def is_chat_model(service_context: ServiceContext) -> bool:
-    llm_predictor = service_context.llm_predictor
-    if not isinstance(llm_predictor, LLMPredictor):
-        return False
-    try:
-        return isinstance(llm_predictor.llm, BaseChatModel)
-    except AttributeError:
-        # NOTE: in testing, our mock llm predictor doesn't have llm attribute
-        return False
+    chat_history.extend(
+        [
+            ChatMessage(role=MessageRole.USER, content=message),
+            ChatMessage(role=MessageRole.ASSISTANT, content=response_str),
+        ]
+    )

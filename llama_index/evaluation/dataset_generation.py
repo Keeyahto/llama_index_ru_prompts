@@ -4,16 +4,15 @@ from __future__ import annotations
 import re
 from typing import List, Optional
 
-from llama_index.bridge.langchain import ChatOpenAI
 
 from llama_index import (
     Document,
     ListIndex,
-    LLMPredictor,
     QuestionAnswerPrompt,
     ServiceContext,
 )
-from llama_index.data_structs.node import Node, NodeWithScore
+from llama_index.llms.openai import OpenAI
+from llama_index.schema import BaseNode, NodeWithScore, MetadataMode
 from llama_index.indices.postprocessor.node import KeywordNodePostprocessor
 
 DEFAULT_QUESTION_GENERATION_PROMPT = """Context information is below.\n"
@@ -26,12 +25,8 @@ DEFAULT_QUESTION_GENERATION_PROMPT = """Context information is below.\n"
 
 def _get_default_service_context() -> ServiceContext:
     """Get default service context."""
-    llm_predictor = LLMPredictor(
-        llm=ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo")
-    )
-    service_context = ServiceContext.from_defaults(
-        llm_predictor=llm_predictor, chunk_size_limit=3000
-    )
+    llm = OpenAI(temperature=0, model="gpt-3.5-turbo")
+    service_context = ServiceContext.from_defaults(llm=llm, chunk_size_limit=3000)
     return service_context
 
 
@@ -51,7 +46,7 @@ class DatasetGenerator:
 
     def __init__(
         self,
-        nodes: List[Node],
+        nodes: List[BaseNode],
         service_context: Optional[ServiceContext] = None,
         num_questions_per_chunk: int = 10,
         text_question_template: Optional[QuestionAnswerPrompt] = None,
@@ -100,7 +95,7 @@ class DatasetGenerator:
             required_keywords=required_keywords,
             exclude_keywords=exclude_keywords,
         )
-        node_with_scores = [NodeWithScore(node) for node in nodes]
+        node_with_scores = [NodeWithScore(node=node) for node in nodes]
         node_with_scores = node_postprocessor.postprocess_nodes(node_with_scores)
         nodes = [node_with_score.node for node_with_score in node_with_scores]
 
@@ -113,7 +108,7 @@ class DatasetGenerator:
         )
 
     def _node_question_generator(
-        self, nodes: List[Node], num: Optional[int] = None
+        self, nodes: List[BaseNode], num: Optional[int] = None
     ) -> List[str]:
         """Node question generator."""
         questions: List[str] = []
@@ -121,7 +116,14 @@ class DatasetGenerator:
         for node in nodes:
             if num is not None and len(questions) >= num:
                 break
-            index = ListIndex.from_documents([Document(node.get_text())])
+            index = ListIndex.from_documents(
+                [
+                    Document(
+                        text=node.get_content(metadata_mode=MetadataMode.NONE),
+                        metadata=node.metadata,
+                    )
+                ]
+            )
 
             query_engine = index.as_query_engine(
                 service_context=self.service_context,
