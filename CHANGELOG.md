@@ -2,8 +2,21 @@
 
 ## Unreleased
 
-## New Features
+### New Features
+- specify `embed_model="local"` to use default local embbeddings in the service context (#6806)
+
+## [v0.7.8] - 2023-07-13
+
+### New Features
 - Added embedding speed benchmark (#6876)
+- Added BEIR retrieval benchmark (#6825)
+
+### Bug Fixes / Nits
+- remove toctrees from deprecated_terms (#6895)
+- Relax typing dependencies (#6879)
+- docs: modification to evaluation notebook (#6840)
+- raise error if the model does not support functions (#6896)
+- fix(bench embeddings): bug not taking into account string length (#6899)x
 
 ## [v0.7.7] - 2023-07-13
 
